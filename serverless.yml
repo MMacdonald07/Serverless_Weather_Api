@@ -1,0 +1,17 @@
+org: mmacdonald07
+app: serverless-weather-api
+service: serverless-weather-api
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs16.x
+  region: eu-west-2
+
+functions:
+  get:
+    handler: index.lambdaHandler
+    events:
+      - httpApi:
+          path: /weather/{location}
+          method: get
