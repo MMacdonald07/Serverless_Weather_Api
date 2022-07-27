@@ -13,5 +13,5 @@ functions:
     handler: index.lambdaHandler
     events:
       - httpApi:
-          path: /weather/{location}
-          method: get
+          path: /{proxy+}
+          method: any

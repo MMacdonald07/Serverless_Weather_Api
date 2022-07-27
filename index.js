@@ -11,10 +11,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.lambdaHandler = void 0;
 const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () {
-    const queries = JSON.stringify(event.queryStringParameters);
+    let location = '';
+    if (event.pathParameters && event.pathParameters.proxy) {
+        location = event.pathParameters.proxy;
+    }
     return {
         statusCode: 200,
-        body: `Queries: ${queries}`
+        body: JSON.stringify({
+            location
+        })
     };
 });
 exports.lambdaHandler = lambdaHandler;
