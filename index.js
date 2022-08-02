@@ -21,7 +21,30 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
     const longitude = JSON.parse(geoResponse.body).longitude;
     let url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${process.env.WEATHER_KEY}`;
     const weatherResponse = yield getWeather(url);
-    return weatherResponse;
+    const forecast = JSON.parse(weatherResponse.body).weather[0].description;
+    const temp = JSON.parse(weatherResponse.body).main.temp;
+    const tempMin = JSON.parse(weatherResponse.body).main.temp_min;
+    const tempMax = JSON.parse(weatherResponse.body).main.temp_max;
+    const humidity = JSON.parse(weatherResponse.body).main.humidity;
+    const windSpeed = JSON.parse(weatherResponse.body).wind.speed + " m/s";
+    return {
+        statusCode: 200,
+        body: JSON.stringify({
+            location: {
+                location,
+                latitude,
+                longitude
+            },
+            weather: {
+                forecast,
+                temp,
+                tempMin,
+                tempMax,
+                humidity,
+                windSpeed
+            }
+        }, null, 4)
+    };
 });
 exports.lambdaHandler = lambdaHandler;
 function geocodeLocation(pathParameters) {
