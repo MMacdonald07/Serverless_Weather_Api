@@ -15,12 +15,37 @@ const https = require('https');
 const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(event);
     const { pathParameters } = event;
-    const geoResponse = yield geocodeLocation(pathParameters);
+    let geoResponse;
+    let weatherResponse;
+    geoResponse = yield geocodeLocation(pathParameters);
+    if (geoResponse.statusCode == 400) {
+        return {
+            statusCode: 400,
+            body: JSON.stringify({
+                "Error": "Please provide a location in url"
+            }, null, 4)
+        };
+    }
+    else if (geoResponse.statusCode == 500) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                "Error": "Failed to geocode provided location"
+            }, null, 4)
+        };
+    }
     const location = JSON.parse(geoResponse.body).location;
     const latitude = JSON.parse(geoResponse.body).latitude;
     const longitude = JSON.parse(geoResponse.body).longitude;
-    let url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${process.env.WEATHER_KEY}`;
-    const weatherResponse = yield getWeather(url);
+    weatherResponse = yield getWeather(latitude, longitude);
+    if (weatherResponse.statusCode == 500) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                "Error": "Failed to fetch weather data for provided location"
+            }, null, 4)
+        };
+    }
     const forecast = JSON.parse(weatherResponse.body).weather[0].description;
     const temp = JSON.parse(weatherResponse.body).main.temp;
     const tempMin = JSON.parse(weatherResponse.body).main.temp_min;
@@ -30,7 +55,7 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
     return {
         statusCode: 200,
         body: JSON.stringify({
-            location: {
+            position: {
                 location,
                 latitude,
                 longitude
@@ -61,8 +86,7 @@ function geocodeLocation(pathParameters) {
             else {
                 location = pathParameters.proxy;
             }
-            let url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${process.env.GEO_KEY}&limit=1`;
-            const req = https.get(url, function (res) {
+            https.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${process.env.GEO_KEY}&limit=1`, function (res) {
                 res.on('data', (chunk) => {
                     dataString += chunk;
                 });
@@ -75,11 +99,10 @@ function geocodeLocation(pathParameters) {
                             location,
                             latitude,
                             longitude
-                        }, null, 4)
+                        })
                     });
                 });
-            });
-            req.on('error', (err) => {
+            }).on('error', (err) => {
                 console.log(err);
                 reject({
                     statusCode: 500,
@@ -89,22 +112,21 @@ function geocodeLocation(pathParameters) {
         });
     });
 }
-function getWeather(url) {
+function getWeather(latitude, longitude) {
     return __awaiter(this, void 0, void 0, function* () {
         let dataString = '';
         return yield new Promise((resolve, reject) => {
-            const req = https.get(url, function (res) {
+            https.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${process.env.WEATHER_KEY}`, function (res) {
                 res.on('data', (chunk) => {
                     dataString += chunk;
                 });
                 res.on('end', () => {
                     resolve({
                         statusCode: 200,
-                        body: JSON.stringify(JSON.parse(dataString), null, 4)
+                        body: JSON.stringify(JSON.parse(dataString))
                     });
                 });
-            });
-            req.on('error', (err) => {
+            }).on('error', (err) => {
                 console.log(err);
                 reject({
                     statusCode: 500,

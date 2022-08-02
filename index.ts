@@ -3,18 +3,44 @@ const https = require('https');
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import { IncomingMessage } from "http";
 
-export const lambdaHandler = async (event : APIGatewayProxyEvent) => {
+export const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIGatewayProxyResult> => {
     console.log(event);
     const { pathParameters } = event;
+    let geoResponse : APIGatewayProxyResult;
+    let weatherResponse : APIGatewayProxyResult;
 
-    const geoResponse : APIGatewayProxyResult = <APIGatewayProxyResult> await geocodeLocation(pathParameters);
+    geoResponse = await geocodeLocation(pathParameters);
+
+    if (geoResponse.statusCode == 400) {
+        return {
+            statusCode : 400,
+            body : JSON.stringify({
+                "Error" : "Please provide a location in url"
+            }, null, 4)
+        }
+    } else if (geoResponse.statusCode == 500) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                "Error" : "Failed to geocode provided location"
+            }, null, 4)
+        }
+    }
+
     const location : string = JSON.parse(geoResponse.body).location;
     const latitude : string = JSON.parse(geoResponse.body).latitude;
     const longitude : string = JSON.parse(geoResponse.body).longitude;
 
-    let url : string = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${process.env.WEATHER_KEY}`;
+    weatherResponse = await getWeather(latitude, longitude);
 
-    const weatherResponse : APIGatewayProxyResult = <APIGatewayProxyResult> await getWeather(url);
+    if (weatherResponse.statusCode == 500) {
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                "Error" : "Failed to fetch weather data for provided location"
+            }, null, 4)
+        }
+    }
 
     const forecast : string = JSON.parse(weatherResponse.body).weather[0].description;
     const temp : string = JSON.parse(weatherResponse.body).main.temp;
@@ -43,7 +69,7 @@ export const lambdaHandler = async (event : APIGatewayProxyEvent) => {
     };
 }
 
-async function geocodeLocation (pathParameters : APIGatewayProxyEvent["pathParameters"]) {
+async function geocodeLocation (pathParameters : APIGatewayProxyEvent["pathParameters"]) : Promise<APIGatewayProxyResult> {
     let dataString : string = '';
     let location : string = '';
 
@@ -57,27 +83,25 @@ async function geocodeLocation (pathParameters : APIGatewayProxyEvent["pathParam
             location = pathParameters.proxy;
         }
 
-        let url : string = `https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${process.env.GEO_KEY}&limit=1`;
-        const req = https.get(url, function (res : IncomingMessage) {
-            res.on('data', (chunk : string) => {
-                dataString += chunk;
-            });
-            res.on('end', () => {
-                const latitude = JSON.parse(dataString).features[0].center[1];
-                const longitude = JSON.parse(dataString).features[0].center[0];
-
-                resolve({
-                    statusCode : 200,
-                    body : JSON.stringify({
-                        location,
-                        latitude,
-                        longitude
-                    }, null, 4)
+        https.get(`https://api.mapbox.com/geocoding/v5/mapbox.places/${location}.json?access_token=${process.env.GEO_KEY}&limit=1`,
+            function (res : IncomingMessage) {
+                res.on('data', (chunk : string) => {
+                    dataString += chunk;
                 });
-            });
-        });
+                res.on('end', () => {
+                    const latitude = JSON.parse(dataString).features[0].center[1];
+                    const longitude = JSON.parse(dataString).features[0].center[0];
 
-        req.on('error', (err : Error) => {
+                    resolve({
+                        statusCode : 200,
+                        body : JSON.stringify({
+                            location,
+                            latitude,
+                            longitude
+                        })
+                    });
+                });
+            }).on('error', (err : Error) => {
             console.log(err);
             reject({
                 statusCode : 500,
@@ -87,23 +111,22 @@ async function geocodeLocation (pathParameters : APIGatewayProxyEvent["pathParam
     });
 }
 
-async function getWeather (url : string) {
+async function getWeather (latitude : string, longitude : string) : Promise<APIGatewayProxyResult> {
     let dataString : string = '';
 
     return await new Promise((resolve, reject) => {
-        const req = https.get(url, function (res : IncomingMessage) {
-            res.on('data', (chunk : string) => {
-                dataString += chunk;
-            });
-            res.on('end', () => {
-                resolve({
-                    statusCode : 200,
-                    body : JSON.stringify(JSON.parse(dataString), null, 4)
+        https.get(`https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&appid=${process.env.WEATHER_KEY}`,
+            function (res : IncomingMessage) {
+                res.on('data', (chunk : string) => {
+                    dataString += chunk;
                 });
-            });
-        });
-
-        req.on('error', (err : Error) => {
+                res.on('end', () => {
+                    resolve({
+                        statusCode : 200,
+                        body : JSON.stringify(JSON.parse(dataString))
+                    });
+                });
+            }).on('error', (err : Error) => {
             console.log(err);
             reject({
                 statusCode : 500,
