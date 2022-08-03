@@ -91,8 +91,20 @@ function geocodeLocation(pathParameters) {
                     dataString += chunk;
                 });
                 res.on('end', () => {
-                    const latitude = JSON.parse(dataString).features[0].center[1];
-                    const longitude = JSON.parse(dataString).features[0].center[0];
+                    let latitude = '';
+                    let longitude = '';
+                    try {
+                        latitude = JSON.parse(dataString).features[0].center[1];
+                        longitude = JSON.parse(dataString).features[0].center[0];
+                    }
+                    catch (e) {
+                        resolve({
+                            statusCode: 500,
+                            body: JSON.stringify({
+                                "Error": "Failed to geocode location"
+                            })
+                        });
+                    }
                     resolve({
                         statusCode: 200,
                         body: JSON.stringify({
