@@ -69,7 +69,7 @@ export const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIG
     };
 }
 
-async function geocodeLocation (pathParameters : APIGatewayProxyEvent["pathParameters"]) : Promise<APIGatewayProxyResult> {
+export async function geocodeLocation (pathParameters : APIGatewayProxyEvent["pathParameters"]) : Promise<APIGatewayProxyResult> {
     let dataString : string = '';
     let location : string = '';
 
@@ -122,7 +122,7 @@ async function geocodeLocation (pathParameters : APIGatewayProxyEvent["pathParam
     });
 }
 
-async function getWeather (latitude : string, longitude : string) : Promise<APIGatewayProxyResult> {
+export async function getWeather (latitude : string, longitude : string) : Promise<APIGatewayProxyResult> {
     let dataString : string = '';
 
     return await new Promise((resolve, reject) => {
@@ -132,6 +132,14 @@ async function getWeather (latitude : string, longitude : string) : Promise<APIG
                     dataString += chunk;
                 });
                 res.on('end', () => {
+                    if (JSON.parse(dataString).cod == "400") {
+                        resolve({
+                            statusCode : 500,
+                            body : JSON.stringify({
+                                "Error": "Failed to fetch weather for given location"
+                            })
+                        });
+                    }
                     resolve({
                         statusCode : 200,
                         body : JSON.stringify(JSON.parse(dataString))

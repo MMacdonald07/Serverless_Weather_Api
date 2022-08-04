@@ -3,12 +3,16 @@
     "aws-sdk": "^2.1182.0",
     "dotenv": "^16.0.1",
     "https": "^1.0.0",
+    "jest": "^28.1.3",
     "mocha": "^10.0.0"
   },
   "devDependencies": {
     "@types/aws-lambda": "^8.10.101",
+    "@types/jest": "^28.1.6",
     "@types/mocha": "^9.1.1",
     "@types/node": "^18.6.1",
+    "aws-event-mocks": "^0.0.0",
+    "ts-jest": "^28.0.7",
     "typescript": "^4.7.4"
   },
   "name": "serverless-weather-api",
@@ -16,7 +20,7 @@
   "main": "index.ts",
   "scripts": {
     "build": "npx tsc",
-    "test": "npm run build && mocha",
+    "test": "npm run build && jest -- ./test/system.test.js",
     "deploy": "serverless deploy",
     "all": "npm run build && npm run deploy"
   },

@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lambdaHandler = void 0;
+exports.getWeather = exports.geocodeLocation = exports.lambdaHandler = void 0;
 require('dotenv').config();
 const https = require('https');
 const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () {
@@ -124,6 +124,7 @@ function geocodeLocation(pathParameters) {
         });
     });
 }
+exports.geocodeLocation = geocodeLocation;
 function getWeather(latitude, longitude) {
     return __awaiter(this, void 0, void 0, function* () {
         let dataString = '';
@@ -133,6 +134,14 @@ function getWeather(latitude, longitude) {
                     dataString += chunk;
                 });
                 res.on('end', () => {
+                    if (JSON.parse(dataString).cod == "400") {
+                        resolve({
+                            statusCode: 500,
+                            body: JSON.stringify({
+                                "Error": "Failed to fetch weather for given location"
+                            })
+                        });
+                    }
                     resolve({
                         statusCode: 200,
                         body: JSON.stringify(JSON.parse(dataString))
@@ -148,3 +157,4 @@ function getWeather(latitude, longitude) {
         });
     });
 }
+exports.getWeather = getWeather;
