@@ -6,10 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-env:
-  GEO_KEY: ${{ secrets.GEO_KEY }}
-  WEATHER_KEY: ${{ secrets.WEATHER_KEY }}
-
 jobs:
   build:
 
@@ -26,11 +22,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
+      - name: Make .env
+        uses: SpicyPizza/create-envfile@v1.3
+        with:
+          envkey_GEO_KEY: ${{ secrets.GEO_KEY }}
+          envkey_WEATHER_KEY: ${{ secrets.WEATHER_KEY }}
+          directory: './'
+          file_name: '.env'
       - run: npm ci
-      - name: create .env file
-        run: |
-          touch .env
-          echo $GEO_KEY >> .env
-          echo $WEATHER_KEY >> .env
       - run: npm run systemTest
       - run: npm run deploy
