@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  GEO_KEY: ${{ secrets.GEO_KEY }}
+  WEATHER_KEY: ${{ secrets.WEATHER_KEY }}
+
 jobs:
   build:
 
@@ -26,7 +30,7 @@ jobs:
       - name: create .env file
         run: |
           touch .env
-          echo GEO_KEY=${{ secrets.GEO_KEY }} >> .env
-          echo WEATHER_KEY=${{ secrets.WEATHER_KEY }} >> .env
+          echo $GEO_KEY >> .env
+          echo $WEATHER_KEY >> .env
       - run: npm run systemTest
       - run: npm run deploy
