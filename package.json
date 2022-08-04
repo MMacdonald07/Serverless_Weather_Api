@@ -12,7 +12,6 @@
     "@types/mocha": "^9.1.1",
     "@types/node": "^18.6.1",
     "aws-event-mocks": "^0.0.0",
-    "serverless": "^3.21.0",
     "ts-jest": "^28.0.7",
     "typescript": "^4.7.4"
   },

@@ -33,4 +33,5 @@ jobs:
           fail_on_empty: true
       - run: npm ci
       - run: npm run systemTest
+      - run: npm install --global serverless
       - run: npm run deploy
