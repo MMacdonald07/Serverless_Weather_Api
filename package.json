@@ -20,7 +20,7 @@
   "main": "index.ts",
   "scripts": {
     "build": "npx tsc",
-    "systemTest": "npm run build && jest -- ./test/system.test.js",
+    "systemTest": "npm run build && jest -- system.test.js",
     "deploy": "serverless deploy",
     "all": "npm run build && npm run deploy"
   },
