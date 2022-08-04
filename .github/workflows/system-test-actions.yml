@@ -23,5 +23,10 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
       - run: npm ci
+      - name: create .env file
+        run: |
+          touch .env
+          echo GEO_KEY=${{ secrets.GEO_KEY }} >> .env
+          echo WEATHER_KEY=${{ secrets.WEATHER_KEY }} >> .env
       - run: npm run systemTest
       - run: npm run deploy
