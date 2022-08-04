@@ -2,5 +2,4 @@
 /.serverless/
 /.idea/
 
-*.test.*
 .env
