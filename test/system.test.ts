@@ -1,4 +1,6 @@
-import { lambdaHandler, geocodeLocation, getWeather } from "../index";
+import { lambdaHandler } from "../index";
+import { geocodeLocation } from "../utils/geocode";
+import { getWeather } from "../utils/forecast";
 const createEvent = require('aws-event-mocks');
 
 describe("Test status codes returned for various geocodeLocation input", () => {
