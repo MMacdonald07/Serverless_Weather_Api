@@ -1,10 +1,10 @@
-name: Main Branch Tests and Deploy
+name: Other Branch Unit Tests
 
 on:
   push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    branches:
+      - '*'
+      - '!main'
 
 jobs:
   build:
@@ -32,12 +32,3 @@ jobs:
           fail_on_empty: true
       - run: npm ci
       - run: npm run unitTest
-      - run: npm run systemTest
-      - name: serverless deploy
-        uses: serverless/github-action@master
-        with:
-          args: deploy
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SERVERLESS_ACCESS_KEY: ${{ secrets.SERVERLESS_ACCESS_KEY }}
