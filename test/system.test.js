@@ -10,10 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const index_1 = require("../index");
+const geocode_1 = require("../utils/geocode");
+const forecast_1 = require("../utils/forecast");
 const createEvent = require('aws-event-mocks');
 describe("Test status codes returned for various geocodeLocation input", () => {
     it('should return status code 200 and correct body for valid location', () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, index_1.geocodeLocation)({ proxy: 'london' });
+        const response = yield (0, geocode_1.geocodeLocation)({ proxy: 'london' });
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(200);
         expect(JSON.parse(response.body)).toHaveProperty('location');
@@ -21,19 +23,19 @@ describe("Test status codes returned for various geocodeLocation input", () => {
         expect(JSON.parse(response.body)).toHaveProperty('longitude');
     }));
     it('should return status code 400 for no location', () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, index_1.geocodeLocation)({ proxy: '' });
+        const response = yield (0, geocode_1.geocodeLocation)({ proxy: '' });
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(400);
     }));
     it('should return status code 500 for invalid location', () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, index_1.geocodeLocation)({ proxy: 'aaaaaaaaa' });
+        const response = yield (0, geocode_1.geocodeLocation)({ proxy: 'aaaaaaaaa' });
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(500);
     }));
 });
 describe("Test status codes returned for various getWeather input", () => {
     it('should return status code 200 and correct body for valid position', () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, index_1.getWeather)('-50', '50');
+        const response = yield (0, forecast_1.getWeather)('-50', '50');
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(200);
         expect(JSON.parse(response.body)).toHaveProperty('main');
@@ -41,7 +43,7 @@ describe("Test status codes returned for various getWeather input", () => {
         expect(JSON.parse(response.body)).toHaveProperty('weather');
     }));
     it('should return status code 500 for invalid location', () => __awaiter(void 0, void 0, void 0, function* () {
-        const response = yield (0, index_1.getWeather)('-500', '500');
+        const response = yield (0, forecast_1.getWeather)('-500', '500');
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(500);
     }));
