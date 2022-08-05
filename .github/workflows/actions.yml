@@ -33,6 +33,7 @@ jobs:
 
   unitTest:
     runs-on: ubuntu-latest
+    needs: [build]
 
     steps:
       - name: Execute unit tests
@@ -40,7 +41,7 @@ jobs:
 
   systemTest:
     runs-on: ubuntu-latest
-    needs: unitTest
+    needs: [build, unitTest]
     if: success() && github.ref == 'refs/heads/main'
 
     steps:
@@ -49,7 +50,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: systemTest
+    needs: [build, unitTest, systemTest]
     if: success() && github.ref == 'refs/heads/main'
     environment: serverless_weather_api
 
