@@ -9,10 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lambdaHandler = void 0;
 require('dotenv').config();
-const geocode_1 = require("./utils/geocode");
-const forecast_1 = require("./utils/forecast");
+const { geocodeLocation } = require("./utils/geocode");
+const { getWeather } = require("./utils/forecast");
 const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(event);
     const { pathParameters } = event;
@@ -72,4 +71,4 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
         }, null, 4)
     };
 });
-exports.lambdaHandler = lambdaHandler;
+module.exports = { lambdaHandler };

@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getWeather = void 0;
 const https_1 = __importDefault(require("https"));
 const getWeather = (latitude, longitude) => __awaiter(void 0, void 0, void 0, function* () {
     let dataString = '';
@@ -44,4 +43,4 @@ const getWeather = (latitude, longitude) => __awaiter(void 0, void 0, void 0, fu
         });
     });
 });
-exports.getWeather = getWeather;
+module.exports = { getWeather };

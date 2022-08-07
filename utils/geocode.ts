@@ -2,7 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
 import https from "https";
 import { IncomingMessage } from "http";
 
-export const geocodeLocation = async (pathParameters : APIGatewayProxyEvent["pathParameters"]) : Promise<APIGatewayProxyResult> => {
+const geocodeLocation = async (pathParameters : APIGatewayProxyEvent["pathParameters"]) : Promise<APIGatewayProxyResult> => {
     let dataString : string = '';
     let location : string = '';
 
@@ -54,3 +54,5 @@ export const geocodeLocation = async (pathParameters : APIGatewayProxyEvent["pat
         });
     });
 }
+
+module.exports = { geocodeLocation };

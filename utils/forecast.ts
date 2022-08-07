@@ -2,7 +2,7 @@ import { APIGatewayProxyResult } from "aws-lambda";
 import https from "https";
 import { IncomingMessage } from "http";
 
-export const getWeather = async (latitude : string, longitude : string) : Promise<APIGatewayProxyResult> => {
+const getWeather = async (latitude : string, longitude : string) : Promise<APIGatewayProxyResult> => {
     let dataString : string = '';
 
     return await new Promise((resolve, reject) => {
@@ -34,3 +34,5 @@ export const getWeather = async (latitude : string, longitude : string) : Promis
         });
     });
 }
+
+module.exports = { getWeather };

@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.geocodeLocation = void 0;
 const https_1 = __importDefault(require("https"));
 const geocodeLocation = (pathParameters) => __awaiter(void 0, void 0, void 0, function* () {
     let dataString = '';
@@ -64,4 +63,4 @@ const geocodeLocation = (pathParameters) => __awaiter(void 0, void 0, void 0, fu
         });
     });
 });
-exports.geocodeLocation = geocodeLocation;
+module.exports = { geocodeLocation };
