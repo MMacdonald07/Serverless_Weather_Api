@@ -9,16 +9,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.lambdaHandler = void 0;
 require('dotenv').config();
-const geocode_1 = require("./utils/geocode");
-const forecast_1 = require("./utils/forecast");
+const { geocodeLocation } = require("./utils/geocode");
+const { getWeather } = require("./utils/forecast");
 const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () {
     console.log(event);
     const { pathParameters } = event;
     let geoResponse;
     let weatherResponse;
-    geoResponse = yield (0, geocode_1.geocodeLocation)(pathParameters);
+    geoResponse = yield geocodeLocation(pathParameters);
     if (geoResponse.statusCode == 400) {
         return {
             statusCode: 400,
@@ -38,7 +37,7 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
     const location = JSON.parse(geoResponse.body).location;
     const latitude = JSON.parse(geoResponse.body).latitude;
     const longitude = JSON.parse(geoResponse.body).longitude;
-    weatherResponse = yield (0, forecast_1.getWeather)(latitude, longitude);
+    weatherResponse = yield getWeather(latitude, longitude);
     if (weatherResponse.statusCode == 500) {
         return {
             statusCode: 500,
@@ -72,4 +71,4 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
         }, null, 4)
     };
 });
-exports.lambdaHandler = lambdaHandler;
+module.exports = { lambdaHandler };

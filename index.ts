@@ -1,9 +1,9 @@
 require('dotenv').config();
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { geocodeLocation } from "./utils/geocode";
-import { getWeather } from "./utils/forecast";
+const { geocodeLocation } =  require("./utils/geocode");
+const { getWeather } = require("./utils/forecast");
 
-export const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIGatewayProxyResult> => {
+const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIGatewayProxyResult> => {
     console.log(event);
     const { pathParameters } = event;
     let geoResponse : APIGatewayProxyResult;
@@ -68,3 +68,5 @@ export const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIG
         }, null, 4)
     };
 }
+
+module.exports = { lambdaHandler };
