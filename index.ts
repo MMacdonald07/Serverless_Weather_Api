@@ -11,6 +11,7 @@ const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIGatewayP
 
     geoResponse = await geocodeLocation(pathParameters);
 
+    // If no location is inputted in endpoint will return invalid request error
     if (geoResponse.statusCode == 400) {
         return {
             statusCode : 400,
@@ -18,6 +19,7 @@ const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIGatewayP
                 "Error" : "Please provide a location in url"
             }, null, 4)
         }
+    // If location is not found by mapbox will return internal server error
     } else if (geoResponse.statusCode == 500) {
         return {
             statusCode: 500,
@@ -27,12 +29,14 @@ const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIGatewayP
         }
     }
 
+    // If successful geocoding request will save the location, latitude and longitude
     const location : string = JSON.parse(geoResponse.body).location;
     const latitude : string = JSON.parse(geoResponse.body).latitude;
     const longitude : string = JSON.parse(geoResponse.body).longitude;
 
     weatherResponse = await getWeather(latitude, longitude);
 
+    // If location is not found by openweathermap, will return internal server error
     if (weatherResponse.statusCode == 500) {
         return {
             statusCode: 500,
@@ -42,6 +46,7 @@ const lambdaHandler = async (event : APIGatewayProxyEvent) : Promise<APIGatewayP
         }
     }
 
+    // If successful request, saves necessary information to return to user
     const forecast : string = JSON.parse(weatherResponse.body).weather[0].description;
     const temp : string = JSON.parse(weatherResponse.body).main.temp;
     const tempMin : string = JSON.parse(weatherResponse.body).main.temp_min;

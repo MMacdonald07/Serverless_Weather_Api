@@ -1,7 +1,7 @@
 import { expect } from "chai";
 const geocode = require('../utils/geocode');
 const forecast = require('../utils/forecast');
-const lambda = require("../index");
+const { lambdaHandler } = require("../index");
 
 const {
     successLocationStub, successWeatherStub,
@@ -13,11 +13,13 @@ const lambdaTester = require('lambda-tester');
 const createEvent = require('aws-event-mocks');
 
 describe("Successful Invocation 200", () => {
+    // Stubs unit test with successful geocodeLocation and getWeather responses
     before(() => {
         sinon.stub(geocode, "geocodeLocation").resolves(successLocationStub);
         sinon.stub(forecast, "getWeather").resolves(successWeatherStub);
     });
 
+    // Restores stubbed functions
     after(() => {
         geocode.geocodeLocation.restore();
         forecast.getWeather.restore();
@@ -27,7 +29,8 @@ describe("Successful Invocation 200", () => {
         const mockEvent = createEvent({ template : "aws:apiGateway" });
         mockEvent.pathParameters = { proxy : {} };
         mockEvent.pathParameters.proxy = 'london';
-        lambdaTester(lambda.lambdaHandler).event(mockEvent).expectResult((response : any) => {
+        // Runs lambdaHandler in mock environment
+        lambdaTester(lambdaHandler).event(mockEvent).expectResult((response : any) => {
             expect(response.statusCode).to.exist;
             expect(response.statusCode).to.equal(200);
             expect(response.body).to.exist;
@@ -35,12 +38,14 @@ describe("Successful Invocation 200", () => {
             expect(JSON.parse(response.body).position).to.exist;
             expect(JSON.parse(response.body).weather).to.exist;
 
+            // Indicates asynchronous code has completed
             done();
         }).catch(done);
     });
 });
 
 describe("Failed Invocation 400 (location)", () => {
+    // Stubs geocodeLocation with no proxy pathParameter
     before(() => {
         sinon.stub(geocode, "geocodeLocation").resolves(noLocationStub);
         // Don't need to stub getWeather as lambda will finish running prior to calling function
@@ -54,7 +59,7 @@ describe("Failed Invocation 400 (location)", () => {
         const mockEvent = createEvent({ template : "aws:apiGateway" });
         mockEvent.pathParameters = { proxy : {} };
         mockEvent.pathParameters.proxy = '';
-        lambdaTester(lambda.lambdaHandler).event(mockEvent).expectResult((response : any) => {
+        lambdaTester(lambdaHandler).event(mockEvent).expectResult((response : any) => {
             expect(response.statusCode).to.exist;
             expect(response.statusCode).to.equal(400);
             expect(response.body).to.exist;
@@ -67,6 +72,7 @@ describe("Failed Invocation 400 (location)", () => {
 });
 
 describe("Failed Invocation 500 (location)", () => {
+    // Stubs geocodeLocation with response for an invalid location input
     before(() => {
         sinon.stub(geocode, "geocodeLocation").resolves(poorLocationStub);
     });
@@ -79,7 +85,7 @@ describe("Failed Invocation 500 (location)", () => {
         const mockEvent = createEvent({ template : "aws:apiGateway" });
         mockEvent.pathParameters = { proxy : {} };
         mockEvent.pathParameters.proxy = 'aaaaaaaaa';
-        lambdaTester(lambda.lambdaHandler).event(mockEvent).expectResult((response : any) => {
+        lambdaTester(lambdaHandler).event(mockEvent).expectResult((response : any) => {
             expect(response.statusCode).to.exist;
             expect(response.statusCode).to.equal(500);
             expect(response.body).to.exist;
@@ -92,6 +98,8 @@ describe("Failed Invocation 500 (location)", () => {
 });
 
 describe("Failed Invocation 500 (weather)", () => {
+    // Stubs geocodeLocation with valid response to ensure getWeather can be accessed
+    // getWeather then stubbed with response for an invalid latitude/longitude input
     before(() => {
         sinon.stub(geocode, "geocodeLocation").resolves(successLocationStub);
         sinon.stub(forecast, "getWeather").resolves(poorWeatherStub);
@@ -106,7 +114,7 @@ describe("Failed Invocation 500 (weather)", () => {
         const mockEvent = createEvent({ template : "aws:apiGateway" });
         mockEvent.pathParameters = { proxy : {} };
         mockEvent.pathParameters.proxy = 'aaaaaaaaa';
-        lambdaTester(lambda.lambdaHandler).event(mockEvent).expectResult((response : any) => {
+        lambdaTester(lambdaHandler).event(mockEvent).expectResult((response : any) => {
             expect(response.statusCode).to.exist;
             expect(response.statusCode).to.equal(500);
             expect(response.body).to.exist;

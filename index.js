@@ -17,7 +17,8 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
     const { pathParameters } = event;
     let geoResponse;
     let weatherResponse;
-    geoResponse = yield (0, geocode_1.geocodeLocation)(pathParameters);
+    geoResponse = yield geocodeLocation(pathParameters);
+    // If no location is inputted in endpoint will return invalid request error
     if (geoResponse.statusCode == 400) {
         return {
             statusCode: 400,
@@ -25,6 +26,7 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
                 "Error": "Please provide a location in url"
             }, null, 4)
         };
+        // If location is not found by mapbox will return internal server error
     }
     else if (geoResponse.statusCode == 500) {
         return {
@@ -34,10 +36,12 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
             }, null, 4)
         };
     }
+    // If successful geocoding request will save the location, latitude and longitude
     const location = JSON.parse(geoResponse.body).location;
     const latitude = JSON.parse(geoResponse.body).latitude;
     const longitude = JSON.parse(geoResponse.body).longitude;
-    weatherResponse = yield (0, forecast_1.getWeather)(latitude, longitude);
+    weatherResponse = yield getWeather(latitude, longitude);
+    // If location is not found by openweathermap, will return internal server error
     if (weatherResponse.statusCode == 500) {
         return {
             statusCode: 500,
@@ -46,6 +50,7 @@ const lambdaHandler = (event) => __awaiter(void 0, void 0, void 0, function* () 
             }, null, 4)
         };
     }
+    // If successful request, saves necessary information to return to user
     const forecast = JSON.parse(weatherResponse.body).weather[0].description;
     const temp = JSON.parse(weatherResponse.body).main.temp;
     const tempMin = JSON.parse(weatherResponse.body).main.temp_min;

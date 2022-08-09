@@ -21,6 +21,7 @@ const getWeather = (latitude, longitude) => __awaiter(void 0, void 0, void 0, fu
                 dataString += chunk;
             });
             res.on('end', () => {
+                // If invalid request code from invalid latitude/longitude input will return error 500
                 if (JSON.parse(dataString).cod == "400") {
                     resolve({
                         statusCode: 500,
@@ -29,6 +30,7 @@ const getWeather = (latitude, longitude) => __awaiter(void 0, void 0, void 0, fu
                         })
                     });
                 }
+                // Otherwise simply return the entire JSON API response body
                 resolve({
                     statusCode: 200,
                     body: JSON.stringify(JSON.parse(dataString))

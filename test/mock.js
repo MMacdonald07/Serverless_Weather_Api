@@ -1,4 +1,5 @@
 "use strict";
+// Various response stubs used in order to mock function calls for unit tests
 exports.successLocationStub = {
     statusCode: 200,
     body: JSON.stringify({

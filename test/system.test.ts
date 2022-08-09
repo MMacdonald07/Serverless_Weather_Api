@@ -1,11 +1,12 @@
-const lambda =  require("../index");
-const geocode =  require("../utils/geocode");
-const forecast = require("../utils/forecast");
+const { lambdaHandler } = require("../index");
+const { geocodeLocation } = require("../utils/geocode");
+const { getWeather } = require("../utils/forecast");
 const createEvent = require('aws-event-mocks');
 
+// geocodeLocation end-to-end tests
 describe("Test status codes returned for various geocodeLocation input", () => {
     it('should return status code 200 and correct body for valid location', async () => {
-        const response = await geocode.geocodeLocation({ proxy : 'london' });
+        const response = await geocodeLocation({ proxy : 'london' });
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(200);
         expect(JSON.parse(response.body)).toHaveProperty('location');
@@ -14,21 +15,22 @@ describe("Test status codes returned for various geocodeLocation input", () => {
     });
 
     it('should return status code 400 for no location', async () => {
-        const response = await geocode.geocodeLocation({ proxy : '' });
+        const response = await geocodeLocation({ proxy : '' });
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(400);
     });
 
     it('should return status code 500 for invalid location', async () => {
-        const response = await geocode.geocodeLocation({ proxy : 'aaaaaaaaa' });
+        const response = await geocodeLocation({ proxy : 'aaaaaaaaa' });
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(500);
     });
 });
 
+// getWeather end-to-end tests
 describe("Test status codes returned for various getWeather input", () => {
     it('should return status code 200 and correct body for valid position', async () => {
-        const response = await forecast.getWeather('-50', '50');
+        const response = await getWeather('-50', '50');
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(200);
         expect(JSON.parse(response.body)).toHaveProperty('main');
@@ -37,18 +39,19 @@ describe("Test status codes returned for various getWeather input", () => {
     });
 
     it('should return status code 500 for invalid location', async () => {
-        const response = await forecast.getWeather('-500', '500');
+        const response = await getWeather('-500', '500');
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(500);
     });
 });
 
+// lambdaHandler end-to-end tests
 describe("Test status codes returned for various LambdaHandler input", () => {
     const mockEvent = createEvent({ template : "aws:apiGateway" });
     mockEvent.pathParameters = { proxy: {} };
     it('should return status code 200 for valid input', async () => {
         mockEvent.pathParameters.proxy = "london";
-        const response = await lambda.lambdaHandler(mockEvent);
+        const response = await lambdaHandler(mockEvent);
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(200);
         expect(JSON.parse(response.body)).toHaveProperty('position');
@@ -57,7 +60,7 @@ describe("Test status codes returned for various LambdaHandler input", () => {
 
     it('should return status code 400 for no input', async () => {
         mockEvent.pathParameters.proxy = '';
-        const response = await lambda.lambdaHandler(mockEvent);
+        const response = await lambdaHandler(mockEvent);
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(400);
         expect(JSON.parse(response.body)).toHaveProperty('Error');
@@ -65,7 +68,7 @@ describe("Test status codes returned for various LambdaHandler input", () => {
 
     it('should return status code 500 for poor input', async () => {
         mockEvent.pathParameters.proxy = 'aaaaaaaaa';
-        const response = await lambda.lambdaHandler(mockEvent);
+        const response = await lambdaHandler(mockEvent);
         expect(typeof response).toBe("object");
         expect(response.statusCode).toBe(500);
         expect(JSON.parse(response.body)).toHaveProperty('Error');

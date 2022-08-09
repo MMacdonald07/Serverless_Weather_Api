@@ -12,6 +12,7 @@ const getWeather = async (latitude : string, longitude : string) : Promise<APIGa
                     dataString += chunk;
                 });
                 res.on('end', () => {
+                    // If invalid request code from invalid latitude/longitude input will return error 500
                     if (JSON.parse(dataString).cod == "400") {
                         resolve({
                             statusCode : 500,
@@ -20,6 +21,7 @@ const getWeather = async (latitude : string, longitude : string) : Promise<APIGa
                             })
                         });
                     }
+                    // Otherwise simply return the entire JSON API response body
                     resolve({
                         statusCode : 200,
                         body : JSON.stringify(JSON.parse(dataString))
